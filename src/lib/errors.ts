@@ -1,0 +1,185 @@
+/**
+ * Mapa código → mensagem pt-BR (catálogo da seção 22 do guia de implementação).
+ * Códigos sem entrada caem no fallback por SQLSTATE ou na mensagem genérica.
+ */
+export const MESSAGES: Record<string, string> = {
+  // Acesso
+  FORBIDDEN: 'Você não tem permissão para esta ação.',
+  CATALOG_FORBIDDEN: 'Você não tem permissão no catálogo.',
+  INVENTORY_FORBIDDEN: 'Você não tem permissão no estoque.',
+  ORDER_FORBIDDEN: 'Você não tem permissão nos pedidos.',
+  REPORT_FORBIDDEN: 'Você não tem permissão para ver os relatórios.',
+  STORE_CREATE_FORBIDDEN: 'Você não pode criar uma loja.',
+  STORE_PUBLISH_FORBIDDEN: 'Você não pode publicar esta loja.',
+  STORE_BRANDING_FORBIDDEN: 'Você não pode alterar a identidade visual da loja.',
+  STORE_UNAVAILABLE: 'Loja indisponível ou sem permissão.',
+  ACCOUNT_UNAVAILABLE: 'Sua conta está inativa. Fale com o suporte.',
+  OWNER_ACCESS_UNAVAILABLE: 'O acesso do proprietário não está disponível.',
+
+  // Idempotência / concorrência
+  REQUEST_REQUIRED: 'Operação sem identificador. Recarregue e tente novamente.',
+  REQUEST_AND_PLAN_REQUIRED: 'Selecione o plano antes de continuar.',
+  IDEMPOTENCY_KEY_REUSED: 'Esta operação já foi enviada com outros dados. Atualize a página.',
+  STALE_ORDER_REVISION: 'O pedido foi alterado por outra ação. Recarregamos os dados.',
+  STALE_INVENTORY_REVISION: 'O estoque deste produto mudou. Confira o saldo atual.',
+
+  // Loja
+  INVALID_STORE_INPUT: 'Verifique os dados da loja.',
+  UNKNOWN_STORE_FIELD: 'Campo de loja desconhecido.',
+  INVALID_STORE_FIELD_TYPE: 'Campo de loja com formato inválido.',
+  INVALID_STORE_NAME_OR_TITLE: 'Nome ou título da loja inválido.',
+  INVALID_STORE_SLUG: 'Endereço inválido: use letras minúsculas, números e hífens (3 a 63 caracteres).',
+  SLUG_ALREADY_EXISTS: 'Este endereço de loja já está em uso.',
+  INVALID_WHATSAPP_NUMBER: 'Informe o WhatsApp no formato internacional, ex.: +5511999999999.',
+  INVALID_SOCIAL_LINKS: 'Use links completos começando com https:// nas redes sociais.',
+  ACTIVE_STORE_ALREADY_EXISTS: 'Você já possui uma loja ativa.',
+  ONBOARDING_ALREADY_ARCHIVED: 'Esta criação de loja já foi descartada. Recomece o cadastro.',
+  PLAN_UNAVAILABLE: 'O cadastro de lojas está indisponível no momento.',
+  PUBLICATION_REQUIRED: 'A loja precisa estar publicada para esta ação.',
+  STORE_HAS_STOCK: 'Zere o estoque antes de arquivar a loja.',
+  STORE_HAS_OPEN_ORDERS: 'Resolva os pedidos em aberto antes de arquivar a loja.',
+  INVALID_LOGO_PATH: 'Arquivo de logo inválido.',
+  LOGO_OBJECT_NOT_FOUND: 'O arquivo do logo não foi encontrado. Envie novamente.',
+  INVALID_BANNER_PATH: 'Arquivo de banner inválido.',
+  BANNER_OBJECT_NOT_FOUND: 'O arquivo do banner não foi encontrado. Envie novamente.',
+
+  // Catálogo
+  INVALID_CATALOG_INPUT: 'Verifique os dados do catálogo.',
+  UNKNOWN_CATALOG_FIELD: 'Campo de catálogo desconhecido.',
+  INVALID_CATEGORY_FIELD_TYPE: 'Campo de categoria com formato inválido.',
+  INVALID_PRODUCT_FIELD_TYPE: 'Campo de produto com formato inválido.',
+  INVALID_MONEY_VALUE: 'Valor monetário inválido (máximo de 2 casas decimais).',
+  CATEGORY_UNAVAILABLE: 'Categoria indisponível.',
+  CATEGORY_ARCHIVED: 'Esta categoria foi arquivada.',
+  CATEGORY_SLUG_EXISTS: 'Já existe uma categoria com este endereço.',
+  CATEGORY_PARENT_UNAVAILABLE: 'A categoria-mãe selecionada não está disponível.',
+  CATEGORY_MAX_TWO_LEVELS: 'Categorias têm no máximo 2 níveis.',
+  CATEGORY_WITH_CHILDREN_CANNOT_BECOME_CHILD: 'Uma categoria com subcategorias não pode virar subcategoria.',
+  CATEGORY_HAS_LIVE_CHILDREN: 'Arquive ou mova as subcategorias antes.',
+  CATEGORY_HAS_LIVE_PRODUCTS: 'Mova os produtos desta categoria antes de arquivá-la.',
+  PRODUCT_UNAVAILABLE: 'Produto indisponível.',
+  PRODUCT_ARCHIVED: 'Este produto foi arquivado.',
+  PRODUCT_SLUG_EXISTS: 'Já existe um produto com este endereço.',
+  PRODUCT_CATEGORY_UNAVAILABLE: 'A categoria selecionada não está disponível.',
+  PRODUCT_HAS_STOCK: 'Zere o estoque antes de arquivar o produto.',
+  PRODUCT_HAS_OPEN_ORDERS: 'Este produto tem pedidos em aberto.',
+  ATTRIBUTES_ARRAY_REQUIRED: 'Lista de atributos inválida.',
+  ATTRIBUTES_LIMIT_30: 'Cada produto pode ter no máximo 30 atributos.',
+  INVALID_ATTRIBUTE: 'Atributo inválido.',
+  UNKNOWN_ATTRIBUTE_FIELD: 'Campo de atributo desconhecido.',
+  INVALID_ATTRIBUTE_NAME_OR_VALUE: 'Atributo precisa de nome (até 80) e valor (até 500).',
+  DUPLICATE_ATTRIBUTE_NAME: 'Há atributos com nome repetido.',
+  PRODUCT_IMAGES_LIMIT_4: 'Cada produto pode ter no máximo 4 imagens.',
+  INVALID_PRODUCT_IMAGE_PATH: 'Arquivo de imagem inválido.',
+  PRODUCT_IMAGE_OBJECT_NOT_FOUND: 'A imagem não foi encontrada. Envie novamente.',
+  INVALID_IMAGE_ORDER: 'Ordem de imagens inválida.',
+
+  // Estoque
+  MANUAL_TYPE_MUST_BE_ENTRY_OR_EXIT: 'Tipo de movimento inválido.',
+  QUANTITY_MUST_BE_POSITIVE_INTEGER: 'A quantidade deve ser um número inteiro maior que zero.',
+  INVALID_MOVEMENT_REASON_OR_REFERENCE: 'Informe um motivo (3 a 500 caracteres) e referência de até 120.',
+  INVALID_UNIT_COST: 'Custo unitário inválido (obrigatório na entrada, até 6 casas).',
+  OUTBOUND_COST_IS_AUTOMATIC: 'O custo de saída é calculado automaticamente.',
+  INSUFFICIENT_STOCK: 'Estoque insuficiente.',
+  STOCK_QUANTITY_LIMIT: 'Quantidade acima do limite permitido.',
+  STOCK_RESERVED_BY_PENDING_ORDERS: 'Há unidades reservadas por pedidos pendentes.',
+  INVALID_COUNT_OR_EXPECTED_REVISION: 'Contagem inválida ou dados desatualizados. Recarregue.',
+  UNIT_COST_NOT_ALLOWED_FOR_OUTBOUND_OR_NO_CHANGE: 'Custo só é aceito quando a contagem aumenta o saldo.',
+  BATCH_ITEMS_ARRAY_REQUIRED: 'Lista de itens do lote inválida.',
+  BATCH_LIMIT_50: 'O lote aceita no máximo 50 produtos.',
+  INVALID_BATCH_ITEM: 'Item do lote inválido.',
+  UNKNOWN_BATCH_FIELD: 'Campo desconhecido no lote.',
+  INVALID_BATCH_FIELD_TYPE: 'Campo do lote com formato inválido.',
+  BATCH_DUPLICATE_PRODUCT: 'Há produtos repetidos no lote.',
+  BATCH_PRODUCT_UNAVAILABLE: 'Um dos produtos do lote não está disponível.',
+  INVALID_REVERSAL_SOURCE: 'Este movimento não pode ser revertido.',
+  MOVEMENT_ALREADY_REVERSED: 'Este movimento já foi revertido.',
+  ONLY_LAST_MOVEMENT_CAN_BE_REVERSED: 'Somente o último movimento do produto pode ser revertido.',
+  ORDER_STOCK_REVERSAL_REQUIRES_ORDER_FLOW: 'Movimentos de pedido são revertidos pelo fluxo do pedido.',
+  INVALID_MOVEMENT_QUANTITY_OR_REQUEST: 'Quantidade ou identificador do movimento inválido.',
+  INVALID_MOVEMENT_SIGN: 'Sinal do movimento inválido.',
+  INVALID_LEDGER_CHAIN: 'Inconsistência no histórico de estoque. Fale com o suporte.',
+
+  // Pedidos
+  ORDER_NOTE_REQUIRED: 'Informe uma nota (mínimo de 3 caracteres).',
+  INVALID_SHIPPING_AMOUNT: 'Valor de frete inválido.',
+  ORDER_TOTAL_LIMIT: 'O total do pedido excede o limite permitido.',
+  ORDER_NOT_PENDING: 'O pedido não está mais pendente. Recarregue.',
+  SHIPPING_TERMS_NOT_CONFIRMED: 'Confirme o frete antes de registrar o pagamento.',
+  PAYMENT_MUST_MATCH_ORDER_TOTAL: 'O valor recebido deve ser igual ao total do pedido.',
+  INVALID_MANUAL_PAYMENT_METHOD: 'Forma de pagamento inválida.',
+  INSUFFICIENT_AVAILABLE_STOCK_FOR_PAYMENT:
+    'Sem estoque disponível para baixar este pedido (a reserva pode ter expirado).',
+  INVALID_TRACKING_CODE: 'Código de rastreio inválido (máx. 120 caracteres).',
+  ORDER_NOT_PAID: 'O pedido não está pago. Recarregue.',
+  ORDER_NOT_SHIPPED: 'O pedido ainda não foi enviado. Recarregue.',
+  ORDER_CANNOT_BE_CANCELLED: 'Este pedido não pode ser cancelado no status atual.',
+  UNEXPECTED_REFUND_FOR_UNPAID_ORDER: 'Pedido não pago não deve ter reembolso.',
+  MANUAL_REFUND_CONFIRMATION_REQUIRED: 'Confirme que o reembolso integral já foi feito.',
+  ORDER_RECEIPT_MISSING: 'Não há recebimento registrado para este pedido.',
+  ORDER_SALE_ALLOCATION_MISSING: 'Baixa de estoque do pedido não encontrada.',
+  RETURN_ITEMS_REQUIRED: 'Informe os itens da devolução.',
+  INVALID_RETURN_ITEMS: 'Itens de devolução inválidos.',
+  INVALID_RETURN_ITEM: 'Item de devolução inválido.',
+  UNKNOWN_RETURN_ITEM_FIELD: 'Campo desconhecido no item de devolução.',
+  INVALID_RETURN_DISPOSITION: 'Informe se cada item voltou ao estoque ou foi danificado.',
+  FULL_ORDER_RETURN_REQUIRED: 'A devolução deve incluir todos os itens do pedido.',
+  ORDER_CANNOT_BE_RETURNED: 'Este pedido não pode ser devolvido no status atual.',
+  PHYSICAL_RETURN_CONFIRMATION_REQUIRED: 'Confirme o recebimento físico dos produtos.',
+  INVALID_ORDER_TRANSITION: 'Transição de status não permitida.',
+  ORDER_TERMINAL: 'Pedido encerrado: não aceita mais alterações.',
+  PAID_ORDER_TERMS_IMMUTABLE: 'O frete de um pedido pago não pode ser alterado.',
+
+  // Despesas / ERP
+  INVALID_EXPENSE_CATEGORY: 'Categoria de despesa inválida.',
+  EXPENSE_CATEGORY_UNAVAILABLE: 'Categoria de despesa indisponível.',
+  INVALID_EXPENSE_AMOUNT: 'Valor da despesa inválido.',
+  INVALID_EXPENSE_DESCRIPTION: 'Informe uma descrição (3 a 500 caracteres).',
+  INVALID_EXPENSE_TIMESTAMP: 'A data deve ser passada (despesas futuras não são aceitas).',
+  INVALID_PURCHASE_STOCK_REFERENCE: 'O movimento de estoque selecionado não é elegível.',
+  EXPENSE_UNAVAILABLE: 'Despesa indisponível.',
+  INVALID_EXPENSE_REVERSAL_KIND: 'Tipo de estorno inválido.',
+  CORRECTION_USES_ORIGINAL_DATE: 'Correções usam a data original do lançamento.',
+  REFUND_BEFORE_EXPENSE: 'O reembolso não pode ter data anterior à despesa.',
+  EXPENSE_ALREADY_REVERSED_OR_NOT_ORIGINAL: 'Esta despesa já foi estornada ou não é um lançamento original.',
+  INVALID_REPORT_PERIOD_OR_TIMEZONE: 'Selecione um período de até 366 dias.',
+  INVALID_REPORT_LIMIT: 'Limite do relatório inválido.',
+
+  // SUDO
+  ACTIVE_REQUIRED: 'A conta precisa estar ativa.',
+  CANNOT_DISABLE_SELF: 'Você não pode desativar a própria conta.',
+  USER_NOT_FOUND: 'Usuário não encontrado.',
+  SYSTEM_DEFINITION_RESERVED: 'Definições de sistema são reservadas.',
+  SYSTEM_DEFINITION_CANNOT_BE_DELETED: 'Definições de sistema não podem ser excluídas.',
+  SECURITY_CODE_AND_SYSTEM_FLAG_IMMUTABLE: 'Código e flag de sistema são imutáveis.',
+
+  // Vitrine (Edge)
+  NETWORK_ERROR: 'Falha de conexão. Verifique sua internet e tente novamente.',
+  NOT_FOUND: 'Não encontrado.',
+  INVALID_PHONE: 'Telefone inválido. Informe DDD + número.',
+  INVALID_ADDRESS: 'Endereço inválido. Confira os campos.',
+  INVALID_ITEMS: 'Itens do pedido inválidos.',
+  DUPLICATE_PRODUCT: 'Produto repetido no pedido.',
+  INVALID_QUANTITY: 'Quantidade inválida (1 a 999).',
+  INSUFFICIENT_AVAILABLE_STOCK: 'Quantidade indisponível em estoque.',
+  ORDER_TOTAL_LIMIT_STOREFRONT: 'O total do pedido excede o limite permitido.',
+  RATE_LIMITED: 'Muitas tentativas. Aguarde alguns segundos.',
+  SERVICE_UNAVAILABLE: 'Serviço indisponível no momento. Tente novamente.',
+  STORE_UNAVAILABLE_PUBLIC: 'Esta loja está indisponível.',
+
+  // Genéricos
+  ACCOUNT_INACTIVE: 'Sua conta está inativa. Fale com o suporte.',
+  INVALID_IMAGE_TYPE: 'Formato de imagem inválido. Use PNG, JPG ou WebP.',
+  IMAGE_TOO_LARGE: 'Imagem maior que o permitido.',
+  UNKNOWN: 'Não foi possível concluir. Tente novamente.',
+}
+
+export const messageFor = (code: string): string =>
+  MESSAGES[code] ??
+  (code.startsWith('23505:')
+    ? 'Já existe um registro com este valor.'
+    : code.startsWith('23514:')
+      ? 'Valor inválido para este campo.'
+      : code.startsWith('23503:')
+        ? 'Este registro está relacionado a outros dados.'
+        : MESSAGES.UNKNOWN)

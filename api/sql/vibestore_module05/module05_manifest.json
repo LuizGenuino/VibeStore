@@ -1,0 +1,46 @@
+{
+  "module": "05 - Vitrine e checkout manual",
+  "dependencies": [
+    "001",
+    "002",
+    "003",
+    "004"
+  ],
+  "sql": [
+    "005_public_checkout.sql",
+    "005_public_checkout_tests.sql"
+  ],
+  "edge_function": "storefront-api",
+  "public_actions": [
+    "catalog",
+    "product",
+    "checkout",
+    "order-status"
+  ],
+  "deployment": [
+    "Aplicar migration uma vez em desenvolvimento.",
+    "Copiar supabase/functions/storefront-api para seu projeto.",
+    "Mesclar config.fragment.toml; nao substituir config.toml existente.",
+    "Preencher secrets. ORDER_TOKEN_SECRET e RATE_LIMIT_SECRET: dois segredos aleatorios independentes, ao menos 32 bytes.",
+    "supabase secrets set --env-file supabase/functions/.env",
+    "supabase functions deploy storefront-api --no-verify-jwt"
+  ],
+  "important": [
+    "Nao colocar chave administrativa no frontend.",
+    "client_secret de cada checkout: 32 bytes criptograficamente aleatorios em base64url, 43 caracteres. Reutilizar junto com request_id em retentativas.",
+    "Telefone nao autentica o cliente; nao existe lookup publico de nome/endereco.",
+    "Reserva: 24 horas, sem renovacao em replay. Expiracao nao cancela o pedido.",
+    "Frete e pagamento sao negociados manualmente; total inclui somente os itens.",
+    "Nao alterar ORDER_TOKEN_SECRET sem planejar compatibilidade das retentativas.",
+    "Rate limit interno nao substitui WAF/CAPTCHA nem protege integralmente a quota de execucao.",
+    "TRUSTED_CLIENT_IP_HEADER vazio por padrao; nao confiar em headers fornecidos livremente pelo visitante.",
+    "URLs de vitrine/acompanhamento sao contratos para o frontend futuro, nao paginas criadas neste pacote."
+  ],
+  "verification": [
+    "PostgreSQL 16 local: testes SQL e regressao dos modulos 01..04.",
+    "Concorrencia local: replay, ultima unidade, bloqueio de saida e quota atomica.",
+    "Deno: 11 testes unitarios do handler e type-check.",
+    "Integracao local: handler usando PostgreSQL real para catalogo, checkout, replay e token.",
+    "Ainda nao implantado nem homologado no Supabase remoto do usuario."
+  ]
+}

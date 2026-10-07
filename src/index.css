@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * VibeStore — tokens de design
+ * Mundo do produto: vitrine de bairro + WhatsApp + caderno de caixa do lojista.
+ * Âncoras: violeta #6750A4 (primária default do backend) e ciano #03A9F4 (secundária default).
+ */
+@layer base {
+  :root {
+    --background: 260 14% 98%;
+    --foreground: 263 24% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 263 24% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 263 24% 10%;
+
+    --primary: 256 34% 48%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 199 97% 48%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 260 10% 94%;
+    --muted-foreground: 263 9% 42%;
+
+    --accent: 256 40% 95%;
+    --accent-foreground: 256 34% 32%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 56% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 35 92% 45%;
+    --warning-foreground: 0 0% 100%;
+
+    --whatsapp: 142 70% 40%;
+    --whatsapp-foreground: 0 0% 100%;
+
+    --border: 263 12% 89%;
+    --input: 263 12% 85%;
+    --ring: 256 34% 48%;
+
+    --sidebar: 263 18% 12%;
+    --sidebar-foreground: 260 10% 92%;
+
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 263 22% 8%;
+    --foreground: 260 10% 94%;
+    --card: 263 18% 11%;
+    --card-foreground: 260 10% 94%;
+    --popover: 263 18% 11%;
+    --popover-foreground: 260 10% 94%;
+    --primary: 256 55% 66%;
+    --primary-foreground: 263 30% 10%;
+    --secondary: 199 90% 55%;
+    --secondary-foreground: 199 60% 10%;
+    --muted: 263 12% 16%;
+    --muted-foreground: 263 8% 62%;
+    --accent: 256 25% 18%;
+    --accent-foreground: 256 40% 85%;
+    --destructive: 0 62% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 50% 45%;
+    --success-foreground: 152 60% 8%;
+    --warning: 35 85% 55%;
+    --warning-foreground: 35 60% 10%;
+    --border: 263 10% 20%;
+    --input: 263 10% 24%;
+    --ring: 256 55% 66%;
+    --sidebar: 263 20% 10%;
+    --sidebar-foreground: 260 10% 90%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'tnum' on, 'lnum' on;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+  }
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
+  }
+}
+
+@layer utilities {
+  /* Cor dinâmica da vitrine (definida pela loja via CSS custom properties) */
+  .storefront-theme {
+    --sf-primary: var(--_sf-primary, 256 34% 48%);
+    --sf-secondary: var(--_sf-secondary, 199 97% 48%);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}

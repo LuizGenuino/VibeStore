@@ -1,0 +1,2 @@
+[functions.storefront-api]
+verify_jwt = false

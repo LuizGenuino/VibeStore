@@ -1,0 +1,48 @@
+{
+  "module": "06 - Operacao manual de pedidos",
+  "dependencies": [
+    "001",
+    "002",
+    "003",
+    "004",
+    "005"
+  ],
+  "files": [
+    "006_order_operations.sql",
+    "006_order_operations_tests.sql"
+  ],
+  "scope": [
+    "Frete manual confirmado antes do pagamento.",
+    "Recebimento manual integral + baixa de estoque + consumo de reserva em transacao.",
+    "Envio, entrega, cancelamento e devolucao total.",
+    "Reembolso manual integral, incluindo frete, nesta versao.",
+    "Reposicao ao valor exato alocado na venda original.",
+    "Itens danificados nao retornam ao estoque vendavel."
+  ],
+  "rpcs": [
+    "update_order_terms",
+    "confirm_order_payment",
+    "ship_order",
+    "deliver_order",
+    "cancel_order",
+    "return_order"
+  ],
+  "important": [
+    "Todas as RPCs de operacao exigem JWT do lojista, request_id e expected_revision.",
+    "Mesmo request_id e payload retornam replay; novos dados com a mesma chave sao rejeitados.",
+    "Pagamento/refund sao declaracoes manuais, sem chamada bancaria.",
+    "Devolucao exige recebimento fisico e confirmacao do refund; nao suporta itens/quantidades parciais.",
+    "orders.pay tambem depende de inventory.exit. Reposicao depende de inventory.entry.",
+    "Reservas expiradas nao garantem disponibilidade: confirmacao de pagamento revalida estoque.",
+    "Movimentos ligados a pedidos nao podem ser revertidos pela RPC generica de estoque.",
+    "Nao arquivar produtos que possam precisar de reposicao por devolucao: reposicao requer produto nao arquivado.",
+    "Pedidos anteriores ao modulo devem estar PENDING; estados manuais existentes exigem reconciliacao.",
+    "Acompanhamento usa a mesma Edge Function e RPC do modulo 05; nao ha nova Edge Function."
+  ],
+  "verification": [
+    "PostgreSQL 16 local: migrations e regressao dos modulos 01..05.",
+    "Testes locais de pagamento, cancelamento, entrega, devolucao, dano e rollback.",
+    "Concorrencia local: pagamento, cancelamento, disputa de transicoes e devolucao.",
+    "Ainda nao implantado nem homologado no Supabase remoto do usuario."
+  ]
+}

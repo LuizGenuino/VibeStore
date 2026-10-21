@@ -80,4 +80,4 @@ export const APP_NAME = 'VibeStore'
 export const APP_URL = (import.meta.env.VITE_APP_URL as string) || window.location.origin
 export const STOREFRONT_API_URL =
   (import.meta.env.VITE_STOREFRONT_API_URL as string) ||
-  `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/storefront-api`
+  `${import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL}/functions/v1/storefront-api`

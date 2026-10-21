@@ -45,17 +45,31 @@ async function call<T>(body: object, signal?: AbortSignal): Promise<T> {
   } catch {
     throw new StorefrontError(0, 'NETWORK_ERROR')
   }
-  const json = (await res.json().catch(() => ({ error: 'SERVICE_UNAVAILABLE' }))) as
-    | { data: T }
-    | { error: StorefrontErrorCode }
-  if (!res.ok || 'error' in json) {
+  const retryAfter = Number(res.headers.get('retry-after')) || undefined
+  let json: unknown
+  try {
+    json = await res.json()
+  } catch {
+    throw new StorefrontError(res.ok ? 503 : res.status, 'SERVICE_UNAVAILABLE', retryAfter)
+  }
+
+  if (typeof json !== 'object' || json === null) {
+    throw new StorefrontError(res.ok ? 503 : res.status, 'SERVICE_UNAVAILABLE', retryAfter)
+  }
+
+  const response = json as { data?: T; error?: StorefrontErrorCode }
+  if (!('data' in response) && !('error' in response)) {
+    throw new StorefrontError(res.ok ? 503 : res.status, 'SERVICE_UNAVAILABLE', retryAfter)
+  }
+
+  if (!res.ok || 'error' in response) {
     throw new StorefrontError(
       res.status,
-      'error' in json ? json.error : 'SERVICE_UNAVAILABLE',
-      Number(res.headers.get('retry-after')) || undefined,
+      'error' in response ? response.error ?? 'SERVICE_UNAVAILABLE' : 'SERVICE_UNAVAILABLE',
+      retryAfter,
     )
   }
-  return (json as { data: T }).data
+  return response.data as T
 }
 
 export const storefrontApi = {

@@ -25,12 +25,10 @@ export const queryClient = new QueryClient({
 void useAuthStore.getState().init()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider delayDuration={200}>
         <AppRouter />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
-  </React.StrictMode>,
 )

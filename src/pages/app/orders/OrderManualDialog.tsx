@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/dialog'
 import { CharCount, FormField } from '@/components/shared/form'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@radix-ui/react-select'
 import { Switch } from '@radix-ui/react-switch'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
@@ -28,7 +27,16 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { UFS } from '@/lib/constants'
 import { Textarea } from '@/components/ui/textarea'
 import { LoadContext } from '@/router'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { catalogService } from '@/services/catalog.service'
+import { useStoreId } from '@/stores/access'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
+
+interface OrderForm {
+    product_id: string;
+    quantity: number;
+}
 interface FormState {
     full_name: string
     phone: string
@@ -77,14 +85,28 @@ function validate(form: FormState): FieldErrors {
 
 function OrderManualDialog(props: any) {
     console.log('OrderManualDialog props:', props); // Debugging line
-
+    const storeId = useStoreId()
     const { setLoading } = useContext(LoadContext)
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
+    const [isAnonymous, setIsAnonymous] = useState<boolean>(true);
     const [form, setForm] = useState<FormState>(EMPTY_FORM)
+    const [orderItems, setOrderItems] = useState<OrderForm[]>([]);
+    const [orderSelected, setOrderSelected] = useState<OrderForm>({ product_id: '', quantity: 1 });
+    const [pedidosErrors, setPedidosErrors] = useState<string[]>([]);
     const [errors, setErrors] = useState<FieldErrors>({})
     const [submitting, setSubmitting] = useState(false)
     const [networkError, setNetworkError] = useState<string | null>(null)
+
+    const productsQuery = useQuery({
+        queryKey: ['catalog', 'products', storeId],
+        queryFn: () => catalogService.listProducts(storeId!, { page: 1, pageSize: 100 }),
+        enabled: !!storeId,
+        placeholderData: keepPreviousData,
+    })
+
+    const items = productsQuery.data?.items ?? []
+
+    console.log('Fetched products:', items); // Debugging line
 
     useEffect(() => {
         const cleanCep = form.postal_code?.replace(/\D/g, '') || ''
@@ -144,9 +166,14 @@ function OrderManualDialog(props: any) {
     }, [form.postal_code])
 
     function onClose() {
-        if (props.onClose) {
-            props.onClose();
-        }
+        setDialogOpen(false)
+        setForm(EMPTY_FORM)
+        setErrors({})
+        setNetworkError(null)
+        setSubmitting(false)
+        setOrderItems([])
+        setOrderSelected({ product_id: '', quantity: 1 });
+        setPedidosErrors([]);
     }
 
     const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -226,7 +253,7 @@ function OrderManualDialog(props: any) {
             <Button onClick={() => setDialogOpen(true)}>Adicionar Manual</Button>
             {dialogOpen && (
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                    <DialogContent>
+                    <DialogContent className="max-h-[98vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>Adicionar Pedido Manualmente</DialogTitle>
                             <DialogDescription>
@@ -234,166 +261,226 @@ function OrderManualDialog(props: any) {
                             </DialogDescription>
                         </DialogHeader>
 
+                        <div className="space-y-4 border rounded-xl bg-card p-5 shadow-sm">
+                            <div className="grid gap-4 sm:grid-cols-[1fr_120px] ">
+                                <FormField
+                                    label="Produtos"
+                                    error={pedidosErrors.length > 0 ? 'Selecione pelo menos um produto.' : undefined}
+                                >
+                                    <Select
+                                        value={orderSelected.product_id}
+                                        onValueChange={(v) => setOrderSelected((f) => ({ ...f, product_id: !v ? '' : v }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecione um produto" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {items.map((r) => (
+                                                <SelectItem key={r.id} value={r.id}>
+                                                    {r.name} (R$ {r.price.toFixed(2)})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </FormField>
+                                <FormField label="Quantidade" required>
+                                    <Input
+                                        inputMode="numeric"
+                                        value={orderSelected.quantity}
+                                        onChange={(e) => setOrderSelected({ ...orderSelected, quantity: Number(e.target.value) })}
+                                        className="tabular-nums"
+                                        autoFocus
+                                    />
+                                </FormField>
+                            </div>
+                            <Button className='mx-auto' onClick={() => {
+                                if (!orderSelected.product_id || orderSelected.quantity < 1) {
+                                    setPedidosErrors(['Selecione pelo menos um produto.']);
+                                    return;
+                                }
+                                setOrderItems([...orderItems, orderSelected]);
+                                setOrderSelected({ product_id: '', quantity: 1 });
+                                setPedidosErrors([]);
+                            }}>
+                                Adicionar Produto
+                            </Button>
+                            <div className="space-y-2">
+                                {orderItems.map((item, index) => {
+                                    const product = items.find(p => p.id === item.product_id);
+                                    return (
+                                        <div key={index} className="flex justify-between items-center border p-2 rounded">
+                                            <span>{product ? product.name : 'Produto não encontrado'} - Qtn: {item.quantity}</span>
+                                            <Button variant="destructive" size="sm" onClick={() => {
+                                                setOrderItems(orderItems.filter((_, i) => i !== index));
+                                            }}>
+                                                Remover
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                         <div className="space-y-4">
+
                             <p className='text-sm font-bold mt-2' >Deseja Inserir os Dados do Cliente?</p>
-                            <RadioGroup defaultValue="comfortable" className="w-full flex flex-row justify-around" onValueChange={(value) => setIsAnonymous(value === 'false')}>
+                            <RadioGroup defaultValue="comfortable" onValueChange={(value) => setIsAnonymous(value === 'true')} className="space-y-2">
                                 <div className="flex items-center gap-3">
-                                    <RadioGroupItem defaultChecked value="true" id="r1" />
-                                    <Label htmlFor="r1">Inserir Cliente</Label>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <RadioGroupItem value="false" id="r2" />
+                                    <RadioGroupItem checked value="true" id="r2" />
                                     <Label htmlFor="r2">Cliente Anônimo</Label>
                                 </div>
-                            </RadioGroup>
+                                <div>
+                                    <RadioGroupItem  value="false" id="r1" />
+                                    <Label htmlFor="r1" className="ml-3">Inserir Cliente</Label>
 
-                            {!isAnonymous && (
-                                <div className="space-y-4 border p-4 rounded-md border-gray-200">
-                                    <form onSubmit={onSubmit} className="space-y-5 rounded-xl border bg-card p-5 shadow-sm" noValidate>
-                                        <section className="space-y-4">
-                                            <h2 className="font-display text-base font-semibold">Dados do Cliente</h2>
-                                            <FormField label="Nome completo" htmlFor="ck-name" error={errors.full_name} required>
-                                                <Input
-                                                    id="ck-name"
-                                                    value={form.full_name}
-                                                    onChange={set('full_name')}
-                                                    maxLength={120}
-                                                    autoComplete="name"
-                                                    placeholder="Como devemos te chamar?"
-                                                />
-                                            </FormField>
-                                            <FormField
-                                                label="Telefone (WhatsApp)"
-                                                htmlFor="ck-phone"
-                                                error={errors.phone}
-                                                hint="Usado pela loja para combinar frete e pagamento."
-                                                required
-                                            >
-                                                <Input
-                                                    id="ck-phone"
-                                                    value={form.phone}
-                                                    onChange={set('phone')}
-                                                    inputMode="tel"
-                                                    autoComplete="tel"
-                                                    placeholder="(11) 99999-9999"
-                                                />
-                                            </FormField>
-                                        </section>
+                                    {!isAnonymous && (
+                                        <form onSubmit={onSubmit} className="space-y-5 rounded-xl border bg-card p-5 shadow-sm mt-2" noValidate>
+                                            <section className="space-y-4">
+                                                <h2 className="font-display text-base font-semibold">Dados do Cliente</h2>
+                                                <FormField label="Nome completo" htmlFor="ck-name" error={errors.full_name} required>
+                                                    <Input
+                                                        id="ck-name"
+                                                        value={form.full_name}
+                                                        onChange={set('full_name')}
+                                                        maxLength={120}
+                                                        autoComplete="name"
+                                                        placeholder="Como devemos te chamar?"
+                                                    />
+                                                </FormField>
+                                                <FormField
+                                                    label="Telefone (WhatsApp)"
+                                                    htmlFor="ck-phone"
+                                                    error={errors.phone}
+                                                    hint="Usado pela loja para combinar frete e pagamento."
+                                                    required
+                                                >
+                                                    <Input
+                                                        id="ck-phone"
+                                                        value={form.phone}
+                                                        onChange={set('phone')}
+                                                        inputMode="tel"
+                                                        autoComplete="tel"
+                                                        placeholder="(11) 99999-9999"
+                                                    />
+                                                </FormField>
+                                            </section>
 
-                                        <Separator />
+                                            <Separator />
 
-                                        <section className="space-y-4">
-                                            <h2 className="font-display text-base font-semibold">Endereço de entrega</h2>
-                                            {errors.address && (
+                                            <section className="space-y-4">
+                                                <h2 className="font-display text-base font-semibold">Endereço de entrega</h2>
+                                                {errors.address && (
+                                                    <Alert variant="destructive">
+                                                        <AlertTriangle />
+                                                        <AlertDescription>{errors.address}</AlertDescription>
+                                                    </Alert>
+                                                )}
+                                                <div className="grid gap-4 sm:grid-cols-2">
+                                                    <FormField label="CEP" htmlFor="ck-cep" error={errors.postal_code} required>
+                                                        <Input
+                                                            id="ck-cep"
+                                                            value={form.postal_code}
+                                                            onChange={set('postal_code')}
+                                                            inputMode="numeric"
+                                                            autoComplete="postal-code"
+                                                            placeholder="00000-000"
+                                                        />
+                                                    </FormField>
+                                                    <FormField label="Bairro" htmlFor="ck-district" error={errors.district} required>
+                                                        <Input
+                                                            id="ck-district"
+                                                            value={form.district}
+                                                            onChange={set('district')}
+                                                            maxLength={160}
+                                                        />
+                                                    </FormField>
+                                                </div>
+                                                <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
+                                                    <FormField label="Rua" htmlFor="ck-street" error={errors.street} required>
+                                                        <Input
+                                                            id="ck-street"
+                                                            value={form.street}
+                                                            onChange={set('street')}
+                                                            maxLength={160}
+                                                            autoComplete="address-line1"
+                                                        />
+                                                    </FormField>
+                                                    <FormField label="Número" htmlFor="ck-number" error={errors.number} required>
+                                                        <Input
+                                                            id="ck-number"
+                                                            value={form.number}
+                                                            onChange={set('number')}
+                                                            maxLength={160}
+                                                        />
+                                                    </FormField>
+                                                </div>
+                                                <FormField label="Complemento" htmlFor="ck-complement" error={errors.complement}>
+                                                    <Input
+                                                        id="ck-complement"
+                                                        value={form.complement}
+                                                        onChange={set('complement')}
+                                                        maxLength={160}
+                                                        placeholder="Apto, bloco, ponto de referência… (opcional)"
+                                                    />
+                                                </FormField>
+                                                <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
+                                                    <FormField label="Cidade" htmlFor="ck-city" error={errors.city} required>
+                                                        <Input id="ck-city" value={form.city} onChange={set('city')} maxLength={160} />
+                                                    </FormField>
+                                                    <FormField label="UF" htmlFor="ck-state" error={errors.state} required>
+                                                        <Select
+                                                            value={form.state}
+                                                            onValueChange={(v) => {
+                                                                setForm((f) => ({ ...f, state: v }))
+                                                                setErrors((prev) => ({ ...prev, state: undefined }))
+                                                            }}
+                                                        >
+                                                            <SelectTrigger id="ck-state" aria-label="UF">
+                                                                <SelectValue placeholder="UF" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {UFS.map((uf) => (
+                                                                    <SelectItem key={uf} value={uf}>
+                                                                        {uf}
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </FormField>
+                                                </div>
+                                            </section>
+
+                                            <Separator />
+
+                                            <section className="space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <h2 className="font-display text-base font-semibold">Observação</h2>
+                                                    <CharCount value={form.note} max={1000} />
+                                                </div>
+                                                <FormField label="" error={errors.note}>
+                                                    <Textarea
+                                                        value={form.note}
+                                                        onChange={set('note')}
+                                                        maxLength={1000}
+                                                        rows={3}
+                                                        placeholder="Algo que a loja deva saber? (opcional)"
+                                                        aria-label="Observação do pedido"
+                                                    />
+                                                </FormField>
+                                            </section>
+
+                                            {networkError && (
                                                 <Alert variant="destructive">
                                                     <AlertTriangle />
-                                                    <AlertDescription>{errors.address}</AlertDescription>
+                                                    <AlertTitle>Falha ao enviar</AlertTitle>
+                                                    <AlertDescription>{networkError} Seus dados foram mantidos.</AlertDescription>
                                                 </Alert>
                                             )}
-                                            <div className="grid gap-4 sm:grid-cols-2">
-                                                <FormField label="CEP" htmlFor="ck-cep" error={errors.postal_code} required>
-                                                    <Input
-                                                        id="ck-cep"
-                                                        value={form.postal_code}
-                                                        onChange={set('postal_code')}
-                                                        inputMode="numeric"
-                                                        autoComplete="postal-code"
-                                                        placeholder="00000-000"
-                                                    />
-                                                </FormField>
-                                                <FormField label="Bairro" htmlFor="ck-district" error={errors.district} required>
-                                                    <Input
-                                                        id="ck-district"
-                                                        value={form.district}
-                                                        onChange={set('district')}
-                                                        maxLength={160}
-                                                    />
-                                                </FormField>
-                                            </div>
-                                            <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
-                                                <FormField label="Rua" htmlFor="ck-street" error={errors.street} required>
-                                                    <Input
-                                                        id="ck-street"
-                                                        value={form.street}
-                                                        onChange={set('street')}
-                                                        maxLength={160}
-                                                        autoComplete="address-line1"
-                                                    />
-                                                </FormField>
-                                                <FormField label="Número" htmlFor="ck-number" error={errors.number} required>
-                                                    <Input
-                                                        id="ck-number"
-                                                        value={form.number}
-                                                        onChange={set('number')}
-                                                        maxLength={160}
-                                                    />
-                                                </FormField>
-                                            </div>
-                                            <FormField label="Complemento" htmlFor="ck-complement" error={errors.complement}>
-                                                <Input
-                                                    id="ck-complement"
-                                                    value={form.complement}
-                                                    onChange={set('complement')}
-                                                    maxLength={160}
-                                                    placeholder="Apto, bloco, ponto de referência… (opcional)"
-                                                />
-                                            </FormField>
-                                            <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
-                                                <FormField label="Cidade" htmlFor="ck-city" error={errors.city} required>
-                                                    <Input id="ck-city" value={form.city} onChange={set('city')} maxLength={160} />
-                                                </FormField>
-                                                <FormField label="UF" htmlFor="ck-state" error={errors.state} required>
-                                                    <Select
-                                                        value={form.state}
-                                                        onValueChange={(v) => {
-                                                            setForm((f) => ({ ...f, state: v }))
-                                                            setErrors((prev) => ({ ...prev, state: undefined }))
-                                                        }}
-                                                    >
-                                                        <SelectTrigger id="ck-state" aria-label="UF">
-                                                            <SelectValue placeholder="UF" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {UFS.map((uf) => (
-                                                                <SelectItem key={uf} value={uf}>
-                                                                    {uf}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </FormField>
-                                            </div>
-                                        </section>
-
-                                        <Separator />
-
-                                        <section className="space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <h2 className="font-display text-base font-semibold">Observação</h2>
-                                                <CharCount value={form.note} max={1000} />
-                                            </div>
-                                            <FormField label="" error={errors.note}>
-                                                <Textarea
-                                                    value={form.note}
-                                                    onChange={set('note')}
-                                                    maxLength={1000}
-                                                    rows={3}
-                                                    placeholder="Algo que a loja deva saber? (opcional)"
-                                                    aria-label="Observação do pedido"
-                                                />
-                                            </FormField>
-                                        </section>
-
-                                        {networkError && (
-                                            <Alert variant="destructive">
-                                                <AlertTriangle />
-                                                <AlertTitle>Falha ao enviar</AlertTitle>
-                                                <AlertDescription>{networkError} Seus dados foram mantidos.</AlertDescription>
-                                            </Alert>
-                                        )}
-                                    </form>
+                                        </form>
+                                    )}
                                 </div>
-                            )}
+
+                            </RadioGroup>
+
 
 
                         </div>
@@ -408,7 +495,8 @@ function OrderManualDialog(props: any) {
                             </Button>
                         </DialogFooter>
                     </DialogContent>
-                </Dialog>)}
+                </Dialog >)
+            }
         </>
     )
 }

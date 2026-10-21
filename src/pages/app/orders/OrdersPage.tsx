@@ -36,6 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import OrderManualDialog from './OrderManualDialog'
 
 const PAGE_SIZE = 20
 const ALL_STATUSES: OrderStatus[] = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED', 'RETURNED', 'CANCELLED']
@@ -266,6 +267,7 @@ export default function OrdersPage() {
               </div>
             </div>
           )}
+          <OrderManualDialog />
         </div>
 
         <TabsContent value="lista" className="mt-0">

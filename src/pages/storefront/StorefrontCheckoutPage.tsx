@@ -110,7 +110,7 @@ export default function StorefrontCheckoutPage() {
     const navigate = useNavigate()
     const items = useCartItems(slug)
     const applyRevalidation = useCartStore((s) => s.applyRevalidation)
-    const { loading, setLoading } = useContext(LoadContext)
+    const { setLoading } = useContext(LoadContext)
 
     const [form, setForm] = useState<FormState>(EMPTY_FORM)
     const [errors, setErrors] = useState<FieldErrors>({})

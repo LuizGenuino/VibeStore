@@ -29,7 +29,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { LoadContext } from '@/router'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { catalogService } from '@/services/catalog.service'
-import { useStoreId } from '@/stores/access'
+import { useAccessStore, useStoreId } from '@/stores/access'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 
@@ -63,6 +63,19 @@ const EMPTY_FORM: FormState = {
     note: '',
 }
 
+const ANONIMUS_FORM: Omit<CheckoutInput, "items"> = {
+    customer: { full_name: 'Cliente Anônimo', phone: '+9999999999999' },
+    address: {
+        postal_code: '78200000',
+        street: 'Inserido pelo Painel',
+        number: '000',
+        complement: 'Inserido pelo Painel',
+        district: 'Inserido pelo Painel',
+        city: 'Cáceres',
+        state: 'MT',
+    },
+}
+
 type FieldErrors = Partial<Record<keyof FormState | 'address', string>>
 
 /** Validação no cliente espelhando a Edge (guia 19.5). */
@@ -83,9 +96,11 @@ function validate(form: FormState): FieldErrors {
     return errors
 }
 
-function OrderManualDialog(props: any) {
-    console.log('OrderManualDialog props:', props); // Debugging line
+function OrderManualDialog() {
+    console.log('OrderManualDialog props'); // Debugging line
     const storeId = useStoreId()
+    const store = useAccessStore((s) => s.store)
+
     const { setLoading } = useContext(LoadContext)
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [isAnonymous, setIsAnonymous] = useState<boolean>(true);
@@ -106,7 +121,6 @@ function OrderManualDialog(props: any) {
 
     const items = productsQuery.data?.items ?? []
 
-    console.log('Fetched products:', items); // Debugging line
 
     useEffect(() => {
         const cleanCep = form.postal_code?.replace(/\D/g, '') || ''
@@ -174,6 +188,7 @@ function OrderManualDialog(props: any) {
         setOrderItems([])
         setOrderSelected({ product_id: '', quantity: 1 });
         setPedidosErrors([]);
+        setIsAnonymous(true);
     }
 
     const set = (key: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -188,33 +203,49 @@ function OrderManualDialog(props: any) {
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (submitting) return
-        const fieldErrors = validate(form)
-        setErrors(fieldErrors)
-        if (Object.values(fieldErrors).some(Boolean)) return
-
-        const phone = toE164(form.phone)
-        if (!phone) return // já coberto por validate
-
-        const input: CheckoutInput = {
-            customer: { full_name: form.full_name.trim(), phone },
-            address: {
-                postal_code: form.postal_code.replace(/\D/g, ''),
-                street: form.street.trim(),
-                number: form.number.trim(),
-                ...(form.complement.trim() ? { complement: form.complement.trim() } : {}),
-                district: form.district.trim(),
-                city: form.city.trim(),
-                state: form.state,
-            },
-            // items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
-            // ...(form.note.trim() ? { note: form.note.trim() } : {}),
-            items: [], // Placeholder for items, as they are not defined in this context
+        if (orderItems.length === 0 || orderItems.some(item => !item.product_id || item.quantity < 1)) {
+            setPedidosErrors(['Selecione pelo menos um produto.']);
+            return;
         }
 
+        let input: CheckoutInput
+        if (isAnonymous) {
+            input = { ...ANONIMUS_FORM, items: orderItems }
+        } else {
+
+            console.log("passou 1")
+            const fieldErrors = validate(form)
+            setErrors(fieldErrors)
+            if (Object.values(fieldErrors).some(Boolean)) return
+            console.log("passou 2")
+
+            const phone = toE164(form.phone)
+            if (!phone) return // já coberto por validate
+            console.log("passou 3")
+
+
+            console.log("passou 4")
+
+
+            input = isAnonymous ? { ...ANONIMUS_FORM, items: orderItems } : {
+                customer: { full_name: form.full_name.trim(), phone },
+                address: {
+                    postal_code: form.postal_code.replace(/\D/g, ''),
+                    street: form.street.trim(),
+                    number: form.number.trim(),
+                    ...(form.complement.trim() ? { complement: form.complement.trim() } : {}),
+                    district: form.district.trim(),
+                    city: form.city.trim(),
+                    state: form.state,
+                },
+                items: orderItems
+            }
+        }
         setSubmitting(true)
         setNetworkError(null)
+        onClose()
         try {
-            const data = await submitCheckout('', input)
+            await submitCheckout(store?.slug ?? '', input)
             // Sucesso — inclusive replayed=true (a reserva NÃO é renovada).
 
         } catch (err) {
@@ -329,7 +360,7 @@ function OrderManualDialog(props: any) {
                                     <Label htmlFor="r2">Cliente Anônimo</Label>
                                 </div>
                                 <div>
-                                    <RadioGroupItem  value="false" id="r1" />
+                                    <RadioGroupItem value="false" id="r1" />
                                     <Label htmlFor="r1" className="ml-3">Inserir Cliente</Label>
 
                                     {!isAnonymous && (

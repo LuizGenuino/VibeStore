@@ -100,12 +100,8 @@ export default function LandingPage() {
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               Grátis para começar — todos os recursos liberados
             </p>
-            <h1 className="font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-balance sm:text-5xl lg:text-6xl">
+            <h1 className="font-display text-6xl font-extrabold leading-[1.08] tracking-tight text-balance sm:text-5xl lg:text-8xl">
               Sua loja no ar hoje.
-              <br />
-              <span className="bg-gradient-to-r from-[#a78bfa] to-[#38bdf8] bg-clip-text text-transparent">
-                Vendida no WhatsApp.
-              </span>
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-white/60">
               Monte uma vitrine personalizada, receba pedidos pelo WhatsApp e gerencie estoque,

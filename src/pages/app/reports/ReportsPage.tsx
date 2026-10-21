@@ -230,12 +230,6 @@ export default function ReportsPage() {
               custos entram na data do recebimento manual.
             </AlertDescription>
           </Alert>
-          {s.warnings.map((w, i) => (
-            <Alert key={i} className="border-warning/40 bg-warning/10">
-              <AlertTriangle />
-              <AlertDescription>{w}</AlertDescription>
-            </Alert>
-          ))}
           {s.needs_stock_review && (
             <Alert className="border-warning/40 bg-warning/10">
               <AlertTriangle />

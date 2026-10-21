@@ -267,7 +267,7 @@ export default function OrdersPage() {
               </div>
             </div>
           )}
-          <OrderManualDialog />
+          <OrderManualDialog reload={q.refetch} />
         </div>
 
         <TabsContent value="lista" className="mt-0">

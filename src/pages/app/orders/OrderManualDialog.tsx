@@ -96,7 +96,7 @@ function validate(form: FormState): FieldErrors {
     return errors
 }
 
-function OrderManualDialog() {
+function OrderManualDialog({ reload }: { reload: () => void }) {
     console.log('OrderManualDialog props'); // Debugging line
     const storeId = useStoreId()
     const store = useAccessStore((s) => s.store)
@@ -243,10 +243,11 @@ function OrderManualDialog() {
         }
         setSubmitting(true)
         setNetworkError(null)
-        onClose()
         try {
             await submitCheckout(store?.slug ?? '', input)
             // Sucesso — inclusive replayed=true (a reserva NÃO é renovada).
+            onClose()
+            reload()
 
         } catch (err) {
             if (err instanceof StorefrontError) {

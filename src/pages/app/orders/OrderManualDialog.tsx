@@ -363,7 +363,6 @@ function OrderManualDialog({ reload }: { reload: () => void }) {
                                 <div>
                                     <RadioGroupItem value="false" id="r1" />
                                     <Label htmlFor="r1" className="ml-3">Inserir Cliente</Label>
-
                                     {!isAnonymous && (
                                         <form onSubmit={onSubmit} className="space-y-5 rounded-xl border bg-card p-5 shadow-sm mt-2" noValidate>
                                             <section className="space-y-4">

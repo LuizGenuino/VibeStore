@@ -14,7 +14,7 @@ import type {
  * A vitrine pública fala exclusivamente com a Edge via POST; nunca chama
  * as RPCs service-only nem lê tabelas (anon não tem SELECT no negócio).
  */
-const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_PUBLISHABLE_KEY || import.meta.env.SUPABASE_ANON_KEY as string
+const ANON = import.meta.env.SUPABASE_PUBLISHABLE_KEY || import.meta.env.SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '' as string
 
 export class StorefrontError extends Error {
   constructor(

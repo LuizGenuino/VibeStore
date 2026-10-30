@@ -9,6 +9,9 @@
   },
   "exclude": [
     "node_modules",
-    "supabase/functions" 
+    "supabase/functions",
+    "api",
+    "**/supabase/functions/**",
+    "**/*_test.ts" 
   ]
 }

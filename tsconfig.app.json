@@ -17,5 +17,12 @@
     "noFallthroughCasesInSwitch": true,
     "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["src", "supabase"]
+  "include": ["src"],
+  "exclude": [
+    "node_modules",
+    "api",
+    "api/**",
+    "**/supabase/functions/**",
+    "**/*_test.ts"
+  ]
 }

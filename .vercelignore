@@ -1,0 +1,13 @@
+# Pastas de backend e scripts SQL
+api/
+sql/
+**/supabase/
+
+# Arquivos de teste e mocks
+**/*_test.ts
+**/*.test.ts
+**/*.spec.ts
+
+# Documentações ou migrations locais
+migrations/
+supabase/functions/

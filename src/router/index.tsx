@@ -148,6 +148,7 @@ export function AppRouter() {
                             </Route>
 
                             {/* Vitrine pública (Edge storefront-api; token de pedido via #fragmento) */}
+                            
                             <Route path="/s/:storeSlug" element={<StorefrontLayout />}>
                                 <Route index element={<StorefrontHomePage />} />
                                 <Route path="produto/:productSlug" element={<StorefrontProductPage />} />

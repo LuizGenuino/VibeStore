@@ -21,6 +21,7 @@
   "exclude": [
     "node_modules",
     "api",
+    "supabase",
     "api/**",
     "**/supabase/functions/**",
     "**/*_test.ts"

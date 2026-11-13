@@ -248,7 +248,6 @@ export default function StoreStepPage() {
                 id="name"
                 value={name}
                 maxLength={140}
-                autoFocus
                 onChange={(e) => {
                   setName(e.target.value)
                   if (!slugTouched) setSlug(slugify(e.target.value))

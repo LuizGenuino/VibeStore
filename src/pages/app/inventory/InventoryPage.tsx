@@ -399,7 +399,6 @@ function MovementDialog({ type, row, onClose }: { type: 'ENTRY' | 'EXIT'; row: B
               value={qty}
               onChange={(e) => setQty(e.target.value)}
               className="tabular-nums"
-              autoFocus
             />
           </FormField>
           {isEntry && (
@@ -508,7 +507,6 @@ function CountDialog({ row, onClose }: { row: Balance; onClose: () => void }) {
               value={counted}
               onChange={(e) => setCounted(e.target.value)}
               className="tabular-nums"
-              autoFocus
             />
           </FormField>
           {increases && (

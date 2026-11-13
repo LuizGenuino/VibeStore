@@ -933,7 +933,6 @@ function ProductImagesCard({
             maxLength={200}
             placeholder="Ex.: Camiseta preta em fundo branco"
             onChange={(e) => altEditing && setAltEditing({ ...altEditing, value: e.target.value })}
-            autoFocus
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setAltEditing(null)} disabled={altMutation.isPending}>
@@ -1034,7 +1033,6 @@ function InitialEntryDialog({
               value={qty}
               onChange={(e) => setQty(e.target.value)}
               className="tabular-nums"
-              autoFocus
             />
           </FormField>
           <FormField label="Custo unitário" required hint="Obrigatório na entrada (até 6 casas decimais).">

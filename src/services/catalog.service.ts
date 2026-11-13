@@ -1,7 +1,7 @@
 import { rpc, toBackendError } from '@/lib/rpc'
 import { supabase } from '@/lib/supabase'
 import { clearPending, stablePending } from '@/lib/pending'
-import { assertImage, productMediaPath } from '@/lib/media'
+import { assertImage, convertToWebp, productMediaPath } from '@/lib/media'
 import type {
   ArchiveCategoryArgs,
   ArchiveCategoryResult,
@@ -186,9 +186,12 @@ export const catalogService = {
   async addProductImage(storeId: Uuid, productId: Uuid, file: File, alt = '') {
     assertImage(file, 'product-images')
     const path = productMediaPath(storeId, productId, file)
+
+    const newFile = await convertToWebp(file)
+
     const up = await supabase.storage
       .from('product-images')
-      .upload(path, file, { upsert: false, contentType: file.type, cacheControl: '31536000' })
+      .upload(path, newFile, { upsert: false, contentType: newFile.type, cacheControl: '31536000' })
     if (up.error) throw toBackendError(up.error as never)
     try {
       return await rpc<AttachProductImageArgs, AttachProductImageResult>('attach_product_image', {

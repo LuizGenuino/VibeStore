@@ -178,7 +178,7 @@ export function createHandler(config: Config, rpc: Rpc): (req: Request) => Promi
         trackingUrl.hash = `token=${accessToken}`
         const phone = string(result.whatsapp_number, 9, 16).replace(/\D/g, '')
         const amount = Number(result.subtotal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-        const message = `Olá! Fiz o pedido ${String(result.code)} na loja ${store}.\nSubtotal dos produtos: ${amount}. Frete e pagamento a combinar.\nAcompanhar: ${trackingUrl.href}`
+        const message = `Olá! \n Fiz o pedido ${String(result.code)} na loja ${store}.\n\nSubtotal dos produtos: ${amount}.\n\n Frete e pagamento a combinar.\n\nAcompanhar Pedido: ${trackingUrl.href}`
         data = { ...result, token: accessToken, tracking_url: trackingUrl.href, whatsapp_url: `https://wa.me/${phone}?text=${encodeURIComponent(message)}`, shipping_included: false }
       }
       if (data === null) return respond({ error: 'NOT_FOUND' }, 404)

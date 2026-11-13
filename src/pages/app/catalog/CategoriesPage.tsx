@@ -424,7 +424,6 @@ function CategoryDialog({
               maxLength={100}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="Ex.: Camisetas"
-              autoFocus
             />
           </FormField>
 

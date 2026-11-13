@@ -114,7 +114,7 @@ function OrderManualDialog({ reload }: { reload: () => void }) {
 
     const productsQuery = useQuery({
         queryKey: ['catalog', 'products', storeId],
-        queryFn: () => catalogService.listProducts(storeId!, { page: 1, pageSize: 100 }),
+        queryFn: () => catalogService.listProducts(storeId!, { page: 1, pageSize: 100, status: 'ACTIVE' }),
         enabled: !!storeId,
         placeholderData: keepPreviousData,
     })
@@ -285,8 +285,8 @@ function OrderManualDialog({ reload }: { reload: () => void }) {
             <Button onClick={() => setDialogOpen(true)}>Adicionar Manual</Button>
             {dialogOpen && (
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                    <DialogContent className="max-h-[98vh] overflow-y-auto">
-                        <DialogHeader>
+                    <DialogContent className="max-h-[90vh] overflow-y-auto">
+                        <DialogHeader className="mt-4">
                             <DialogTitle>Adicionar Pedido Manualmente</DialogTitle>
                             <DialogDescription>
                                 Adicione um pedido manualmente preenchendo os campos abaixo.
@@ -321,7 +321,7 @@ function OrderManualDialog({ reload }: { reload: () => void }) {
                                         value={orderSelected.quantity}
                                         onChange={(e) => setOrderSelected({ ...orderSelected, quantity: Number(e.target.value) })}
                                         className="tabular-nums"
-                                        autoFocus
+                                        
                                     />
                                 </FormField>
                             </div>
@@ -337,7 +337,7 @@ function OrderManualDialog({ reload }: { reload: () => void }) {
                                 Adicionar Produto
                             </Button>
                             <div className="space-y-2">
-                                {orderItems.map((item, index) => {
+                                {orderItems.length > 0 ? orderItems.map((item, index) => {
                                     const product = items.find(p => p.id === item.product_id);
                                     return (
                                         <div key={index} className="flex justify-between items-center border p-2 rounded">
@@ -349,12 +349,16 @@ function OrderManualDialog({ reload }: { reload: () => void }) {
                                             </Button>
                                         </div>
                                     );
-                                })}
+                                }) : (
+                                    <p className="text-sm text-muted-foreground text-center">
+                                        Nenhum produto adicionado.
+                                    </p>
+                                )}
                             </div>
                         </div>
                         <div className="space-y-4">
 
-                            <p className='text-sm font-bold mt-2' >Deseja Inserir os Dados do Cliente?</p>
+                            <p className='text-sm font-bold mt-2' >Inserir os Dados do Cliente?</p>
                             <RadioGroup defaultValue="comfortable" onValueChange={(value) => setIsAnonymous(value === 'true')} className="space-y-2">
                                 <div className="flex items-center gap-3">
                                     <RadioGroupItem checked value="true" id="r2" />
@@ -517,11 +521,12 @@ function OrderManualDialog({ reload }: { reload: () => void }) {
                         </div>
 
                         <DialogFooter>
-                            <Button variant="outline" onClick={onClose} disabled={submitting}>
+                            <Button className="m-1" variant="outline" onClick={onClose} disabled={submitting}>
                                 Cancelar
                             </Button>
-                            <Button onClick={onSubmit} disabled={submitting}>
-                                {submitting && <RefreshCw className="animate-spin" />}
+                            
+                            <Button className="m-1" onClick={onSubmit} disabled={submitting}>
+                                {submitting && <RefreshCw className="animate-spin sm-mb" />}
                                 Salvar
                             </Button>
                         </DialogFooter>

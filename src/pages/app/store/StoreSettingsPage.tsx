@@ -871,7 +871,7 @@ export default function StoreSettingsPage() {
             onChange={(e) => setArchiveConfirm(e.target.value)}
             placeholder={store.slug}
             className="font-mono"
-            autoFocus
+            
           />
 
           <AlertDialogFooter>

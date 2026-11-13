@@ -326,7 +326,7 @@ export default function MovementsPage() {
               maxLength={500}
               onChange={(e) => setReverseReason(e.target.value)}
               placeholder="Ex.: entrada registrada por engano"
-              autoFocus
+              
             />
           </FormField>
           <DialogFooter>

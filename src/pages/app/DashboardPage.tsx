@@ -370,7 +370,7 @@ export default function DashboardPage() {
 
         {/* (e) Link público da vitrine */}
         {canReadStore && store.is_published && (
-          <Card>
+          <Card className='max-w-[90vw]'>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4 text-primary" />

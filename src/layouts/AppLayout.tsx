@@ -243,7 +243,7 @@ export function AppLayout() {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex-1 px-4 py-6 lg:px-8">
+        <main className="flex-1 px-4 py-6 lg:px-8 max-w-[100vw]">
           <Outlet />
         </main>
       </div>

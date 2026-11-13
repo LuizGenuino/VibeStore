@@ -2,35 +2,59 @@ import { supabase } from './supabase'
 
 const EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }
 export const LIMITS = {
-  'store-logos': 2_097_152,
-  'store-banners': 5_242_880,
-  'product-images': 5_242_880,
+    'store-logos': 2_097_152,
+    'store-banners': 5_242_880,
+    'product-images': 5_242_880,
 } as const
 export type Bucket = keyof typeof LIMITS
 
 export class MediaError extends Error {
-  constructor(public code: 'INVALID_IMAGE_TYPE' | 'IMAGE_TOO_LARGE') {
-    super(code)
-    this.name = 'MediaError'
-  }
+    constructor(public code: 'INVALID_IMAGE_TYPE' | 'IMAGE_TOO_LARGE') {
+        super(code)
+        this.name = 'MediaError'
+    }
 }
 
 /** Validação no cliente espelhando as policies: MIME png/jpeg/webp e limite por bucket. */
 export function assertImage(file: File, bucket: Bucket) {
-  if (!EXT[file.type]) throw new MediaError('INVALID_IMAGE_TYPE')
-  if (file.size > LIMITS[bucket]) throw new MediaError('IMAGE_TOO_LARGE')
+    if (!EXT[file.type]) throw new MediaError('INVALID_IMAGE_TYPE')
+    if (file.size > LIMITS[bucket]) throw new MediaError('IMAGE_TOO_LARGE')
+}
+
+// converte image para webp 
+export async function convertToWebp(file: File): Promise<File> {
+    if (file.type === 'image/webp') return file
+
+    const img = document.createElement('img')
+    img.src = URL.createObjectURL(file)
+    await img.decode()
+
+    const canvas = document.createElement('canvas')
+    canvas.width = img.naturalWidth
+    canvas.height = img.naturalHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Falha ao criar contexto de desenho do canvas')
+    ctx.drawImage(img, 0, 0)
+    const blob = await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob((result) => {
+            if (result) resolve(result)
+            else reject(new Error('Falha ao converter imagem para WebP'))
+        }, 'image/webp', 0.8),
+    )
+    return new File([blob], file.name, { type: 'image/webp' })
 }
 
 export const storeMediaPath = (storeId: string, file: File) =>
-  `${storeId}/${crypto.randomUUID()}.${EXT[file.type]}`
+    `${storeId}/${crypto.randomUUID()}.${EXT[file.type]}`
+
 export const productMediaPath = (storeId: string, productId: string, file: File) =>
-  `${storeId}/${productId}/${crypto.randomUUID()}.${EXT[file.type]}`
+    `${storeId}/${productId}/${crypto.randomUUID()}.${EXT[file.type]}`
 
 /** O banco guarda SÓ o caminho relativo; a URL é montada no cliente (buckets públicos). */
 export const publicUrl = (bucket: Bucket, path: string | null | undefined): string | null =>
-  path ? supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl : null
+    path ? supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl : null
 
 export const storeLogoUrl = (path: string | null | undefined) => publicUrl('store-logos', path)
 export const storeBannerUrl = (path: string | null | undefined) => publicUrl('store-banners', path)
 export const productImageUrl = (path: string | null | undefined) =>
-  publicUrl('product-images', path)
+    publicUrl('product-images', path)
